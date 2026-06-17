@@ -1,0 +1,42 @@
+version: "3"
+
+tasks:
+  setup:
+    desc: Install dependencies
+    cmds:
+      - pnpm ci
+
+  clean:
+    desc: Clean cache
+    cmds:
+      - rm -rf ./.next
+
+  dev:
+    desc: Start Next.js in development mode
+    cmds:
+      - pnpm exec next dev
+
+  run:
+    desc: Start Next.js in production mode
+    cmds:
+      - pnpm exec next start
+
+  build:
+    desc: Build application
+    cmds:
+      - pnpm exec next build
+
+  format:
+    desc: Format code
+    cmds:
+      - pnpm exec eslint --fix
+
+  add-ui:
+    desc: Add shadcn ui
+    cmds:
+      - pnpm dlx shadcn@latest add {{.CLI_ARGS}}
+
+  repomix:
+    desc: repomix
+    cmds:
+      - repomix --ignore "src/components/ui"

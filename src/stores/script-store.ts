@@ -25,6 +25,7 @@ type ScriptState = Readonly<{
   deleteLine: (id: string) => void;
   moveUpLine: (id: string) => void;
   moveDownLine: (id: string) => void;
+  moveLine: (previousIndex: number, currentIndex: number) => void;
   resetAllLineIds: () => void;
   removeAllLineFiles: () => void;
   updateWordField: <K extends keyof Word>(id: string, field: K, value: Word[K]) => void;
@@ -172,6 +173,13 @@ export const useScriptStore = create<ScriptState>()(
         if (index === -1 || index >= lineIds.length - 1) return;
 
         [lineIds[index + 1], lineIds[index]] = [lineIds[index], lineIds[index + 1]];
+      }),
+
+    moveLine: (previousIndex, currentIndex) =>
+      set((state) => {
+        const lineIds = state.script.lineIds;
+        const [item] = lineIds.splice(previousIndex, 1);
+        lineIds.splice(currentIndex, 0, item);
       }),
 
     resetAllLineIds: () => set((state) => {

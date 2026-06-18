@@ -1,5 +1,7 @@
 'use client';
 
+import { DragDropProvider } from '@dnd-kit/react';
+import { isSortable, useSortable } from '@dnd-kit/react/sortable';
 import { ArrowDown, ArrowUp, ChevronDownIcon, ChevronUpIcon, Dices, Play, Plus, Trash2, X } from 'lucide-react';
 import { FocusEvent, memo, useEffect, useId, useRef, useState } from 'react';
 
@@ -301,6 +303,8 @@ type LineEditorProps = {
 const LineEditor = memo(function LineEditor({ lineId, index, voicesDatalistId }: Readonly<LineEditorProps>) {
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const { ref: sortableRef, handleRef, isDragging } = useSortable({ id: lineId, index });
+
   // グローバル開閉状態
   const isAllExpanded = useLinesExpandStore((state) => state.isExpanded);
 
@@ -338,17 +342,26 @@ const LineEditor = memo(function LineEditor({ lineId, index, voicesDatalistId }:
 
   return (
     <div
-      ref={containerRef}
+      ref={(e) => {
+        containerRef.current = e;
+        sortableRef(e);
+      }}
       tabIndex={0} // フォーカス可能にする。
       className={cn(
-        'p-2 flex gap-2 items-center [&:has(+_*)]:border-b content-auto',
+        'p-2 flex gap-2 items-center [&:has(+_*)]:border-b bg-background content-auto',
         // 子要素を含むフォーカス時にアウトラインを付ける。
-        isFocused && 'outline-3 outline-primary/30 border-transparent',
+        !isDragging && isFocused && 'outline-3 outline-primary/30 border-transparent',
+        // ドラッグ時に影を付ける。
+        isDragging && 'drag-preview',
       )}
       onFocus={handleFocus}
       onBlur={handleBlur}
     >
-      <div className='min-w-10'>
+      <div
+        ref={handleRef}
+        title='ドラッグ＆ドロップで移動'
+        className='min-w-10 max-w-fit flex-1 self-stretch flex items-center'
+      >
         <span className='mr-0.5'>#</span>
         <span>{index + 1}</span>
       </div>
@@ -426,20 +439,33 @@ export function LinesEditor() {
   const voicesDatalistId = useId();
 
   const insertLine = useScriptStore((state) => state.insertLine);
+  const moveLine = useScriptStore((state) => state.moveLine);
 
   return (
     <div className='p-2 flex flex-col gap-2'>
       <VoicesDatalist id={voicesDatalistId} />
 
       <div className='flex flex-col'>
-        {lineIds.map((lineId, index) => (
-          <LineEditor
-            key={lineId}
-            lineId={lineId}
-            index={index}
-            voicesDatalistId={voicesDatalistId}
-          />
-        ))}
+        <DragDropProvider
+          onDragEnd={(event) => {
+            if (event.canceled) return;
+
+            const { source } = event.operation;
+
+            if (!isSortable(source) || source.initialIndex === source.index) return;
+
+            moveLine(source.initialIndex, source.index);
+          }}
+        >
+          {lineIds.map((lineId, index) => (
+            <LineEditor
+              key={lineId}
+              lineId={lineId}
+              index={index}
+              voicesDatalistId={voicesDatalistId}
+            />
+          ))}
+        </DragDropProvider>
       </div>
 
       <Button variant='secondary' onClick={() => insertLine()}>

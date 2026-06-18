@@ -1,4 +1,4 @@
-# vosc
+# vosed - Voice Script Editor
 
 音声台本エディタ＆音声合成インターフェースを備えた、ローカル実行用のWebアプリケーションです。
 [Irodori-TTS-Server](https://github.com/Aratako/Irodori-TTS-Server)などの音声合成サーバーと連携し、YAML形式の音声台本の編集および台詞の音声合成を自動化することができます。
@@ -54,8 +54,8 @@
 リポジトリをクローンし、依存関係をインストールする。
 
 ```bash
-git clone https://github.com/shiguruikai/vosc.git
-cd vosc
+git clone https://github.com/shiguruikai/vosed.git
+cd vosed
 task setup
 ```
 

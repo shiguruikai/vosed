@@ -6,7 +6,7 @@ import { ReactNode } from 'react';
 import { Providers } from './providers';
 
 export const metadata: Metadata = {
-  title: 'vosc',
+  title: 'vosed - Voice Script Editor',
 };
 
 export default function RootLayout({

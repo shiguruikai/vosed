@@ -105,7 +105,7 @@ export function AppBar() {
   return (
     <div className='px-2 py-1 flex items-center justify-between bg-primary text-primary-foreground'>
       <div className='flex items-center gap-2'>
-        <h1 className='text-xl font-bold tracking-wide'>vosc</h1>
+        <h1 className='text-xl font-bold tracking-wide'>vosed</h1>
       </div>
 
       <div className='flex gap-1'>

@@ -45,6 +45,7 @@ const eslintConfig = defineConfig([
           varsIgnorePattern: '^_',
           args: 'after-used',
           argsIgnorePattern: '^_',
+          ignoreRestSiblings: true,
         },
       ],
       // imports および exports をソートする。

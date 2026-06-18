@@ -1,49 +1,61 @@
 'use client';
 
 import { Plus, SortAsc, Trash2 } from 'lucide-react';
+import { memo } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Word } from '@/lib/schemas';
 import { useScriptStore } from '@/stores/script-store';
 
-function WordCell({ index, word }: Readonly<{ index: number; word: string }>) {
+function WordCell({ wordId, word }: Readonly<{ wordId: string; word: string }>) {
   return (
     <TableCell>
       <Input
         key={word}
         defaultValue={word}
-        onBlur={(e) => useScriptStore.getState().updateWordField(index, 'word', e.target.value)}
+        onBlur={(e) => useScriptStore.getState().updateWordField(wordId, 'word', e.target.value)}
       />
     </TableCell>
   );
 }
 
-function ReadingCell({ index, reading }: Readonly<{ index: number; reading: string }>) {
+function ReadingCell({ wordId, reading }: Readonly<{ wordId: string; reading: string }>) {
   return (
     <TableCell>
       <Input
         key={reading}
         defaultValue={reading}
-        onBlur={(e) => useScriptStore.getState().updateWordField(index, 'reading', e.target.value)}
+        onBlur={(e) => useScriptStore.getState().updateWordField(wordId, 'reading', e.target.value)}
       />
     </TableCell>
   );
 }
 
-function ActionsCell({ index }: Readonly<{ index: number }>) {
+function ActionsCell({ wordId }: Readonly<{ wordId: string }>) {
   return (
     <TableCell className='flex justify-center gap-4'>
       <Button
         size='icon'
         variant='outline'
-        onClick={() => useScriptStore.getState().deleteWord(index)}
+        onClick={() => useScriptStore.getState().deleteWord(wordId)}
       >
         <Trash2 />
       </Button>
     </TableCell>
   );
 }
+
+const WordEditor = memo(function WordEditor({ word }: Readonly<{ word: Word }>) {
+  return (
+    <TableRow>
+      <WordCell wordId={word.id} word={word.word} />
+      <ReadingCell wordId={word.id} reading={word.reading} />
+      <ActionsCell wordId={word.id} />
+    </TableRow>
+  );
+});
 
 export function WordsEditor() {
   const words = useScriptStore((state) => state.script.words);
@@ -75,12 +87,8 @@ export function WordsEditor() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {words.map((word, index) => (
-            <TableRow key={index}>
-              <WordCell index={index} word={word.word} />
-              <ReadingCell index={index} reading={word.reading} />
-              <ActionsCell index={index} />
-            </TableRow>
+          {words.map((word) => (
+            <WordEditor key={word.id} word={word} />
           ))}
         </TableBody>
       </Table>

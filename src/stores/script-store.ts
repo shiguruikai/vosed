@@ -3,7 +3,7 @@ import { temporal } from 'zundo';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 
-import { Line, Script, ScriptSchema, Word } from '@/lib/schemas';
+import { Line, LineSchema, Script, ScriptSchema, Word, WordSchema } from '@/lib/schemas';
 import { compareJapaneseNumeric } from '@/lib/utils';
 
 type ScriptState = Readonly<{
@@ -27,23 +27,16 @@ type ScriptState = Readonly<{
   moveDownLine: (id: string) => void;
   resetAllLineIds: () => void;
   removeAllLineFiles: () => void;
-  updateWordField: <K extends keyof Word>(index: number, field: K, value: Word[K]) => void;
+  updateWordField: <K extends keyof Word>(id: string, field: K, value: Word[K]) => void;
   insertWord: (index?: number, word?: Word) => void;
-  deleteWord: (index: number) => void;
+  deleteWord: (id: string) => void;
   sortWords: () => void;
 }>;
 
 // 履歴の最大保存数
 const PAST_LIMIT = 100;
 
-const createEmptyLine = (): Line => ({
-  id: crypto.randomUUID(),
-  voice: '',
-  text: '',
-  speed: 1,
-  seed: -1,
-  file: null,
-});
+const createEmptyLine = () => LineSchema.parse({});
 
 const convertToYaml = (state: ScriptState, { excludeId }: { excludeId: boolean }) => {
   const lines = state.script.lineIds.map((id) => state.script.linesById[id]);
@@ -62,9 +55,11 @@ const convertToYaml = (state: ScriptState, { excludeId }: { excludeId: boolean }
     };
   });
 
+  const cleanWords = state.script.words.map(({ id, ...rest }) => rest);
+
   return yaml.dump(
     {
-      words: state.script.words,
+      words: cleanWords,
       lines: cleanLines,
     },
     {
@@ -97,7 +92,7 @@ export const useScriptStore = create<ScriptState>()(
       const loaded = yaml.load(content) as any;
 
       const parsed = ScriptSchema.safeParse({
-        words: loaded?.words,
+        words: loaded?.words?.map(({ id, ...rest }: any) => rest),
         lines: loaded?.lines,
       });
 
@@ -197,20 +192,24 @@ export const useScriptStore = create<ScriptState>()(
       });
     }),
 
-    updateWordField: (index, field, value) =>
+    updateWordField: (id, field, value) =>
       set((state) => {
-        state.script.words[index][field] = value;
+        const word = state.script.words.find((w) => w.id === id);
+        if (word) {
+          word[field] = value;
+        }
       }),
 
     insertWord: (index, word) =>
       set((state) => {
         index ??= state.script.words.length - 1;
-        word ??= { word: '', reading: '' };
-        state.script.words.splice(index + 1, 0, word);
+        state.script.words.splice(index + 1, 0, WordSchema.parse({ word: '', reading: '', ...word }));
       }),
 
-    deleteWord: (index) =>
+    deleteWord: (id) =>
       set((state) => {
+        const index = state.script.words.findIndex((w) => w.id === id);
+        if (index === -1) return;
         state.script.words.splice(index, 1);
       }),
 

@@ -13,6 +13,7 @@ export const JsonStringSchema = z.string().transform((str, ctx) => {
 });
 
 export const WordSchema = z.object({
+  id: z.preprocess(() => crypto.randomUUID(), z.string().default('')),
   word: z.coerce.string().default(''),
   reading: z.coerce.string().default(''),
 });

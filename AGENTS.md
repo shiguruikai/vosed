@@ -6,7 +6,7 @@
 .
 ├── .env.example                       # 環境変数の設定例
 ├── .gitignore                         # gitの無視ルール
-├── AGENTS.md                          # AIエージェントへの指示（※未使用のため、デフォルトのまま）
+├── AGENTS.md                          # AIエージェントへの指示
 ├── CLAUDE.md                          # Claude Code向けの指示（AGENTS.mdを参照するだけ）
 ├── components.json                    # shadcn/uiの設定ファイル
 ├── eslint.config.mjs                  # ESLintの設定ファイル
